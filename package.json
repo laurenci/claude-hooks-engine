@@ -1,0 +1,42 @@
+{
+  "name": "claude-hooks-engine",
+  "version": "0.1.2",
+  "description": "Type-safe observer framework for Claude Code hook scripts",
+  "author": "Maksym Mishchuk maxim.mishchuk@gmail.com",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/laurenci/claude-hooks-engine"
+  },
+  "keywords": ["claude", "claude-code", "hooks", "ai-hooks"],
+  "scripts": {
+    "build:js": "bun build ./index.ts --outdir ./dist --target node --format esm",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build": "bun run build:js && bun run build:types",
+    "handler": "bun ./src/index.ts",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@logtape/logtape": "^2.3.1"
+  }
+}
