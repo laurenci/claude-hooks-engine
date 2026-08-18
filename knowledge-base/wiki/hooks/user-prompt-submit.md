@@ -18,19 +18,31 @@ In addition to the [common input fields](../reference/common-input-fields.md), U
 
 ## Output / Decision control
 
-In addition to the [common output fields](../reference/json-output.md), UserPromptSubmit hooks can return:
+In addition to the [common output fields](../reference/json-output.md), UserPromptSubmit hooks can return the following fields. Note that `decision` and `reason` are **top-level** fields, while `additionalContext`, `sessionTitle`, and `suppressOriginalPrompt` go inside a **`hookSpecificOutput`** object (with `hookEventName: "UserPromptSubmit"`):
 
-| Field | Description |
-| :-- | :-- |
-| `decision` | `"block"` prevents the prompt from being processed and erases it from context. Omit to allow the prompt to proceed |
-| `reason` | Shown to the user when `decision` is `"block"`. Not added to context |
-| `additionalContext` | String added to Claude's context alongside the submitted prompt |
-| `sessionTitle` | Sets the session title based on prompt content |
-| `suppressOriginalPrompt` | If `true` when blocking, omits the prompt text from the block message shown to the user |
+| Field | Placement | Description |
+| :-- | :-- | :-- |
+| `decision` | top-level | `"block"` prevents the prompt from being processed and erases it from context. Omit to allow the prompt to proceed |
+| `reason` | top-level | Shown to the user when `decision` is `"block"`. Not added to context |
+| `additionalContext` | `hookSpecificOutput` | String added to Claude's context alongside the submitted prompt |
+| `sessionTitle` | `hookSpecificOutput` | Sets the session title based on prompt content |
+| `suppressOriginalPrompt` | `hookSpecificOutput` | If `true` when blocking, omits the prompt text from the block message shown to the user |
 
 **Two ways to add context on exit 0:**
 - **Plain text stdout:** Claude Code adds stdout as plain text to Claude's context
-- **JSON `additionalContext`:** Use JSON format for more control
+- **JSON `additionalContext`:** Use JSON format for more control, placing the field inside `hookSpecificOutput`
+
+```json
+{
+  "decision": "block",
+  "reason": "Explanation for decision",
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": "My additional context here",
+    "sessionTitle": "My session title"
+  }
+}
+```
 
 A hook that blocks by exiting 2 routes the same way as `reason`: the block message shows stderr text to the user, and it is not added to context.
 

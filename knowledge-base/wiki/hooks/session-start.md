@@ -26,7 +26,7 @@ In addition to the [common input fields](../reference/common-input-fields.md), S
 
 ## Output / Decision control
 
-In addition to the [common output fields](../reference/json-output.md), SessionStart hooks can return:
+In addition to the [common output fields](../reference/json-output.md), SessionStart hooks can return event-specific fields. When using JSON output, these fields go inside a **`hookSpecificOutput`** object (with `hookEventName: "SessionStart"`):
 
 | Field | Description |
 | :-- | :-- |
@@ -36,7 +36,17 @@ In addition to the [common output fields](../reference/json-output.md), SessionS
 | `watchPaths` | Array of absolute paths to watch for `FileChanged` events during this session |
 | `reloadSkills` | Boolean. When `true`, Claude Code re-scans skill and command directories after hooks complete, making newly installed skills available in the same session starting with the first prompt |
 
-**Note:** Plain stdout is automatically added to Claude's context for this event. Use JSON output only when combining context with other output fields such as `sessionTitle`.
+**Note:** Plain stdout is automatically added to Claude's context for this event. Use JSON output only when combining context with other output fields such as `sessionTitle`. When using JSON, wrap event-specific fields in `hookSpecificOutput`:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "Current branch: feat/auth-refactor\nUncommitted changes: src/auth.ts, src/login.tsx\nActive issue: #4211 Migrate to OAuth2",
+    "sessionTitle": "auth-refactor"
+  }
+}
+```
 
 ## Special behaviour
 
