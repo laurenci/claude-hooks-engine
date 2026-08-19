@@ -3,6 +3,8 @@ import type { HookHandler } from './core/handlers.js'
 import type { PayloadNormalizer } from './core/payloads/hook.payload.js'
 import type { IO, IOProvider } from './io.js'
 import { createLogger } from './logger.js'
+import { HookError } from './core/errors/hook.error.js'
+import { BlockingHookError } from './core/errors/blocking.error.js'
 
 const log = createLogger('observer', 'payload')
 
@@ -85,8 +87,19 @@ export function createObserver(ioProvider: IOProvider): Observer {
 
         log.info('handler completed: {hookName}, {eventName}', { hookName, eventName })
       } catch (err) {
-        log.error('handler error: {err}', { err })
-        observer.io.out.write(JSON.stringify({ action: 'continue' }))
+        if (err instanceof HookError) {
+          const isNonBlockable = hookName === 'PostToolUse' || hookName === 'Notification' || hookName === 'SessionStart'
+          if (err instanceof BlockingHookError && isNonBlockable) {
+            log.warn('BlockingHookError thrown from non-blockable hook {hookName} — downgrading to non-blocking', { hookName })
+            observer.io.out.write(JSON.stringify({ continue: true }))
+          } else {
+            await err.process(observer.io)
+          }
+          process.exit(err.exitCode)
+        }
+        log.error('unhandled handler error: {err}', { err })
+        observer.io.out.write(JSON.stringify({ continue: true }))
+        if (err instanceof Error) observer.io.err.write(`${err.stack ?? err.message}\n`)
       }
     },
   }

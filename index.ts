@@ -44,3 +44,21 @@ export type {
 export {
   nonBlockingErrorMessage
 } from './src/core/responses/index.js'
+export {
+  HookError,
+  BlockingHookError,
+  NonBlockingHookError,
+  PreToolUse,
+  Stop,
+  SubagentStop,
+  UserPromptSubmit,
+  PreCompact,
+  PostToolUse,
+  Notification,
+  SessionStart,
+} from './src/core/errors/index.js'
+export type {
+  NonBlockingHookErrorOptions,
+  PostToolUseNonBlockingOptions,
+  SessionStartNonBlockingOptions,
+} from './src/core/errors/index.js'
