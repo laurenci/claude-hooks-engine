@@ -1,31 +1,19 @@
-import type { HookEvent } from "./hooks.js";
-import type {
-    PreToolUsePayload,
-    PostToolUsePayload,
-    NotificationPayload,
-    StopPayload,
-    SubagentStopPayload,
-    UserPromptSubmitPayload,
-    PreCompactPayload,
-    SessionStartPayload
-} from "./payloads/index.js"
-
-import type {
-    BaseHookResponse,
-    PreToolUseResponse,
-    PostToolUseResponse,
-    StopResponse,
-    UserPromptSubmitResponse,
-    PreCompactResponse,
-    SessionStartResponse
-} from "./responses/index.js";
+import type { HookEvent } from './hooks.js'
+import type { Payload as PreToolUsePayload, Response as PreToolUseResponse } from './hooks/pre-tool-use/index.js'
+import type { Payload as PostToolUsePayload, Response as PostToolUseResponse } from './hooks/post-tool-use/index.js'
+import type { Payload as NotificationPayload, Response as NotificationResponse } from './hooks/notification/index.js'
+import type { Payload as StopPayload, Response as StopResponse } from './hooks/stop/index.js'
+import type { Payload as SubagentStopPayload, Response as SubagentStopResponse } from './hooks/subagent-stop/index.js'
+import type { Payload as UserPromptSubmitPayload, Response as UserPromptSubmitResponse } from './hooks/user-prompt-submit/index.js'
+import type { Payload as PreCompactPayload, Response as PreCompactResponse } from './hooks/pre-compact/index.js'
+import type { Payload as SessionStartPayload, Response as SessionStartResponse } from './hooks/session-start/index.js'
 
 interface HookMap {
   PreToolUse: { payload: PreToolUsePayload; response: PreToolUseResponse }
   PostToolUse: { payload: PostToolUsePayload; response: PostToolUseResponse }
-  Notification: { payload: NotificationPayload; response: BaseHookResponse }
+  Notification: { payload: NotificationPayload; response: NotificationResponse }
   Stop: { payload: StopPayload; response: StopResponse }
-  SubagentStop: { payload: SubagentStopPayload; response: StopResponse }
+  SubagentStop: { payload: SubagentStopPayload; response: SubagentStopResponse }
   UserPromptSubmit: { payload: UserPromptSubmitPayload; response: UserPromptSubmitResponse }
   PreCompact: { payload: PreCompactPayload; response: PreCompactResponse }
   SessionStart: { payload: SessionStartPayload; response: SessionStartResponse }
