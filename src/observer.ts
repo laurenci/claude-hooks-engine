@@ -79,7 +79,7 @@ export function createObserver(ioProvider: IOProvider): Observer {
           typeof payload['tool_name'] === 'string' ?
           (payload['tool_name'] as string) : undefined
 
-        log.info('handler invoked: {hookName}, {eventName}', { hookName, eventName, ...(toolName !== undefined && { tool_name: toolName }) })
+        log.info('handler invoked: {hookName}, {eventName}', { hookName, eventName })
 
         const response = await (handler as (p: unknown) => Promise<unknown>)(payload)
         observer.io.out.write(JSON.stringify(response))
