@@ -1,6 +1,6 @@
 {
   "name": "claude-hooks-engine",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "Type-safe observer framework for Claude Code hook scripts",
   "author": "Maksym Mishchuk maxim.mishchuk@gmail.com",
   "license": "MIT",
@@ -11,6 +11,38 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./pre-tool-use": {
+      "import": "./dist/src/core/hooks/pre-tool-use/index.js",
+      "types": "./dist/src/core/hooks/pre-tool-use/index.d.ts"
+    },
+    "./stop": {
+      "import": "./dist/src/core/hooks/stop/index.js",
+      "types": "./dist/src/core/hooks/stop/index.d.ts"
+    },
+    "./subagent-stop": {
+      "import": "./dist/src/core/hooks/subagent-stop/index.js",
+      "types": "./dist/src/core/hooks/subagent-stop/index.d.ts"
+    },
+    "./user-prompt-submit": {
+      "import": "./dist/src/core/hooks/user-prompt-submit/index.js",
+      "types": "./dist/src/core/hooks/user-prompt-submit/index.d.ts"
+    },
+    "./pre-compact": {
+      "import": "./dist/src/core/hooks/pre-compact/index.js",
+      "types": "./dist/src/core/hooks/pre-compact/index.d.ts"
+    },
+    "./post-tool-use": {
+      "import": "./dist/src/core/hooks/post-tool-use/index.js",
+      "types": "./dist/src/core/hooks/post-tool-use/index.d.ts"
+    },
+    "./notification": {
+      "import": "./dist/src/core/hooks/notification/index.js",
+      "types": "./dist/src/core/hooks/notification/index.d.ts"
+    },
+    "./session-start": {
+      "import": "./dist/src/core/hooks/session-start/index.js",
+      "types": "./dist/src/core/hooks/session-start/index.d.ts"
     }
   },
   "files": [
@@ -23,7 +55,7 @@
   },
   "keywords": ["claude", "claude-code", "hooks", "ai-hooks"],
   "scripts": {
-    "build:js": "bun build ./index.ts --outdir ./dist --target node --format esm",
+    "build:js": "bun build ./index.ts ./src/core/hooks/pre-tool-use/index.ts ./src/core/hooks/stop/index.ts ./src/core/hooks/subagent-stop/index.ts ./src/core/hooks/user-prompt-submit/index.ts ./src/core/hooks/pre-compact/index.ts ./src/core/hooks/post-tool-use/index.ts ./src/core/hooks/notification/index.ts ./src/core/hooks/session-start/index.ts --outdir ./dist --target node --format esm",
     "build:types": "tsc -p tsconfig.build.json",
     "build": "bun run build:js && bun run build:types",
     "handler": "bun ./src/index.ts",

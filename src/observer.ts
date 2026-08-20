@@ -1,6 +1,6 @@
 import type { HookEvent } from './core/hooks.js'
 import type { HookHandler } from './core/handlers.js'
-import type { PayloadNormalizer } from './core/payloads/hook.payload.js'
+import type { PayloadNormalizer } from './core/hooks/hook-payload.js'
 import type { IO, IOProvider } from './io.js'
 import { createLogger } from './logger.js'
 import { isHookError } from './core/hooks/hook-error.js'

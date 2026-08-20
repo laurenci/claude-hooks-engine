@@ -25,20 +25,14 @@ test('public API exports HookEvent', async () => {
   expect(api.HookEvent.PostToolUse).toBe('PostToolUse')
 })
 
-test('public API exports HookError base classes', async () => {
+test('public API exports isHookError', async () => {
   const api = await import('../index')
-  expect(typeof api.BlockingHookError).toBe('function')
-  expect(typeof api.NonBlockingHookError).toBe('function')
+  expect(typeof api.isHookError).toBe('function')
 })
 
-test('public API exports hook error namespaces', async () => {
-  const api = await import('../index')
-  expect(typeof api.PreToolUse.BlockingError).toBe('function')
-  expect(typeof api.PreToolUse.NonBlockingError).toBe('function')
-  expect(typeof api.Stop.BlockingError).toBe('function')
-  expect(typeof api.SessionStart.NonBlockingError).toBe('function')
-  // Non-blockable hooks have no BlockingError
-  expect((api.PostToolUse as any).BlockingError).toBeUndefined()
-  expect((api.Notification as any).BlockingError).toBeUndefined()
-  expect((api.SessionStart as any).BlockingError).toBeUndefined()
+test('public API does NOT export hook-specific namespaces', async () => {
+  const api = await import('../index') as Record<string, unknown>
+  expect(api['PreToolUse']).toBeUndefined()
+  expect(api['Stop']).toBeUndefined()
+  expect(api['PostToolUse']).toBeUndefined()
 })

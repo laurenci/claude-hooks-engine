@@ -1,5 +1,5 @@
 import type { HookPayload, PayloadNormalizer } from '../hook-payload.js'
-import type { FileReader } from '../../io.js'
+import type { FileReader } from '../../../io.js'
 
 export interface Payload extends HookPayload<'PostToolUse'> {
   tool_name: string
