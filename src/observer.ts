@@ -95,6 +95,9 @@ export function createObserver(ioProvider: IOProvider): Observer {
             observer.io.out.write(JSON.stringify(err.outMessage))
           }
           if (err.errMessage !== undefined) observer.io.err.write(err.errMessage)
+          // Exit with the original error code (typically 2 for HookErrors) even if response was downgraded.
+          // The stdout payload controls Claude Code's block/continue decision; the exit code signals to the OS
+          // that this hook execution encountered an error condition, which is always true when HookError is thrown.
           process.exit(err.exitCode)
         }
         log.error('unhandled handler error: {err}', { err })

@@ -54,6 +54,8 @@ test('notify() runtime guard: blocking kind on PostToolUse downgrades to continu
   }
 
   expect(JSON.parse(stdout[0]!)).toEqual({ continue: true })
+  // Exit code 2 is preserved from the BlockingHookError even though the runtime guard downgraded the response to non-blocking.
+  // This is intentional: the exit code signals the error to the OS, while the stdout { continue: true } controls Claude Code's behavior.
   expect(exitSpy).toHaveBeenCalledWith(2)
   exitSpy.mockRestore()
 })
