@@ -2,50 +2,65 @@
 
 ## HookError
 
-An exception thrown from a hook handler to signal that the handler cannot
-produce a valid response. `notify()` catches `HookError`, calls
-`error.process(io)` to write the IO response, then calls
-`process.exit(error.exitCode)`. Unknown errors (non-`HookError`) fall back
-to a safe-continue response.
+A TypeScript interface (not a class) describing an object thrown from a hook
+handler to signal that the handler cannot produce a valid response. `notify()`
+detects a `HookError` via `isHookError()`, reads its fields to write stdout
+and stderr, then calls `process.exit(exitCode)`. Unknown thrown values fall
+back to a safe-continue response.
+
+Fields: `kind`, `exitCode`, `outMessage?`, `errMessage?`.
 
 ## BlockingHookError
 
-A `HookError` subclass that stops Claude Code from proceeding. Exit code 2.
+A `HookError` interface whose `kind` is `'blocking'` and `exitCode` is `2`.
 Only meaningful on blockable hooks: `PreToolUse`, `UserPromptSubmit`, `Stop`,
-`SubagentStop`, `PreCompact`. When thrown from a non-blockable hook, the
+`SubagentStop`, `PreCompact`. When detected on a non-blockable hook, the
 runtime guard in `notify()` downgrades it to a non-blocking response.
+
+The `outMessage` shape is hook-specific and enforced by each hook module's
+`blockingError()` factory.
 
 ## NonBlockingHookError
 
-A `HookError` subclass that allows Claude Code to continue. Exit code 0.
-Optionally surfaces a `reason` string to the Claude session via `systemMessage`,
-and optionally writes a `stdErrMessage` to stderr (Claude Code debug logs).
+A `HookError` interface whose `kind` is `'non-blocking'` and `exitCode` is
+`0`. Allows Claude Code to continue. Optionally carries `outMessage` (written
+to stdout) and `errMessage` (written to stderr, visible in debug logs only).
+
+## Hook Module
+
+A sub-path export of the library (e.g. `claude-hooks-engine/pre-tool-use`)
+that groups everything related to one hook event: its `Payload` type, its
+`Response` type, and its error factories (`blockingError()`,
+`nonBlockingError()`). Consumers import a hook module with
+`import * as PreToolUse from 'claude-hooks-engine/pre-tool-use'`.
 
 ## Blockable Hook
 
 A hook event whose response Claude Code reads to decide whether to halt:
 `PreToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `PreCompact`.
-These hooks expose both `BlockingError` and `NonBlockingError` in their namespace.
+Their hook modules expose both `blockingError()` and `nonBlockingError()`
+factories.
 
 ## Non-blockable Hook
 
 A hook event that Claude Code always continues past regardless of response:
-`PostToolUse`, `Notification`, `SessionStart`. These hooks expose only
-`NonBlockingError` in their namespace.
+`PostToolUse`, `Notification`, `SessionStart`. Their hook modules expose only
+`nonBlockingError()`.
 
-## Hook Namespace
+## isHookError
 
-A TypeScript `namespace` (e.g. `PreToolUse`, `Stop`, `SessionStart`) that
-groups the error classes for a specific hook event. Concrete error classes
-live inside namespaces rather than the global scope to keep names unambiguous
-and co-locate blocking/non-blocking variants.
+A type guard function (`isHookError(err): err is HookError`) that checks for
+the `kind` discriminant field at runtime. Used by `notify()` to distinguish
+`HookError` objects from unknown thrown values. The `kind` field also narrows
+the type to `BlockingHookError` or `NonBlockingHookError` downstream.
 
-## process(io)
+## outMessage
 
-The abstract method on `HookError` that owns all IO side effects: writing
-the JSON response to stdout and optionally writing debug text to stderr.
-Keeping exit-code logic out of `process(io)` ensures the method is testable
-without mocking `process.exit`.
+The stdout payload field on a `HookError`. May be a string or a structured
+object. `notify()` serializes it with `JSON.stringify` and writes it to
+stdout. Each hook's `blockingError()` factory enforces the hook-specific
+shape (e.g. `PreToolUse.blockingError()` produces
+`{ permissionDecision: 'deny', permissionDecisionReason }` as `outMessage`).
 
 ## Runtime Guard
 
