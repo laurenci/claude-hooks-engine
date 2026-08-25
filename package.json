@@ -1,6 +1,6 @@
 {
   "name": "claude-hooks-engine",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Type-safe observer framework for Claude Code hook scripts",
   "author": "Maksym Mishchuk maxim.mishchuk@gmail.com",
   "license": "MIT",
@@ -19,6 +19,10 @@
     "./stop": {
       "import": "./dist/src/core/hooks/stop/index.js",
       "types": "./dist/src/core/hooks/stop/index.d.ts"
+    },
+    "./subagent-start": {
+      "import": "./dist/src/core/hooks/subagent-start/index.js",
+      "types": "./dist/src/core/hooks/subagent-start/index.d.ts"
     },
     "./subagent-stop": {
       "import": "./dist/src/core/hooks/subagent-stop/index.js",

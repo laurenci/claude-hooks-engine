@@ -3,6 +3,7 @@ export const HookEvent = {
   PostToolUse: "PostToolUse",
   Notification: "Notification",
   Stop: "Stop",
+  SubagentStart: "SubagentStart",
   SubagentStop: "SubagentStop",
   UserPromptSubmit: "UserPromptSubmit",
   PreCompact: "PreCompact",

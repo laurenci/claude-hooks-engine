@@ -33,7 +33,7 @@ function handleNonHookError(io: IO, errorMessage: string) {
 }
 
 function handleHookError(io: IO, hookName: string, err : HookError) {
-  const isNonBlockable = hookName === 'PostToolUse' || hookName === 'Notification' || hookName === 'SessionStart'
+  const isNonBlockable = hookName === 'PostToolUse' || hookName === 'Notification' || hookName === 'SessionStart' || hookName === 'SubagentStart'
   if (err.kind === 'blocking' && isNonBlockable) {
     log.warn('BlockingHookError thrown from non-blockable hook {hookName} — downgrading to non-blocking', { hookName })
     io.out.write(JSON.stringify({ continue: true }))
@@ -52,6 +52,7 @@ export function createObserver(ioProvider: IOProvider): Observer {
       PostToolUse: new Map(),
       Notification: new Map(),
       Stop: new Map(),
+      SubagentStart: new Map(),
       SubagentStop: new Map(),
       UserPromptSubmit: new Map(),
       PreCompact: new Map(),
