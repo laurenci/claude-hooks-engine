@@ -150,6 +150,7 @@ describe('onFinish', () => {
     try { await observer.notify('Stop', 'test') } catch {}
 
     expect(order).toEqual(['first', 'second'])
+    expect(exitSpy).toHaveBeenCalledWith(2)
     exitSpy.mockRestore()
   })
 
