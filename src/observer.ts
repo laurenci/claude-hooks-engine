@@ -94,12 +94,12 @@ export function createObserver(ioProvider: IOProvider): Observer {
       }
 
       const rawPayload = await observer.io.in.json() as Record<string, unknown>
-      log.debug('received payload: {payload}', () => ({ payload: rawPayload }));
+      log.debug('received payload: {payload}', () => ({ payload: rawPayload }))
 
       const normalizer = observer.normalizers[hookName]
       const payload: Record<string, unknown> = normalizer
         ? await (normalizer as PayloadNormalizer<HookEvent>).normalise(rawPayload) as unknown as Record<string, unknown>
-        : rawPayload;
+        : rawPayload
 
       let exitCode: number | null = null
 
@@ -112,14 +112,14 @@ export function createObserver(ioProvider: IOProvider): Observer {
         log.info('handler completed: {hookName}, {eventName}', { hookName, eventName })
       } catch (err) {
         if (isHookError(err)) {
-          handleHookError(observer.io, hookName, err);
+          handleHookError(observer.io, hookName, err)
           // Capture exit code — process.exit() is called after the finally block drains cleanups.
           // The stdout payload controls Claude Code's block/continue decision; the exit code signals to the OS
           // that this hook execution encountered an error condition, which is always true when HookError is thrown.
           exitCode = err.exitCode
         } else {
           log.error('unhandled handler error: {err}', { err })
-          if (err instanceof Error) handleNonHookError(observer.io, err.message);
+          if (err instanceof Error) handleNonHookError(observer.io, err.message)
         }
       } finally {
         for (const cleanup of cleanups) {
