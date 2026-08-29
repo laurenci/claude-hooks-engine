@@ -172,19 +172,29 @@ describe('onFinish', () => {
     exitSpy.mockRestore()
   })
 
-  test('callbacks are NOT invoked on happy path', async () => {
+  test('callbacks run on happy path', async () => {
     const payload = { session_id: 'abc', transcript_path: '/t', hook_event_name: 'SessionStart', source: 'startup' }
     const { io } = makeMockIO(payload)
     let cleanupCalled = false
 
-    const observer = createObserver(() => io)
-    observer
+    await createObserver(() => io)
       .onFinish(async () => { cleanupCalled = true })
       .subscribe('SessionStart', 'test', async () => ({ additionalContext: '' }))
+      .notify('SessionStart', 'test')
 
-    await observer.notify('SessionStart', 'test')
+    expect(cleanupCalled).toBe(true)
+  })
 
-    expect(cleanupCalled).toBe(false)
+  test('callbacks run on unknown error path', async () => {
+    const { io } = makeMockIO({ session_id: 's1', transcript_path: '/t' })
+    let cleanupCalled = false
+
+    await createObserver(() => io)
+      .onFinish(async () => { cleanupCalled = true })
+      .subscribe('Stop', 'test', async () => { throw new Error('crash') })
+      .notify('Stop', 'test')
+
+    expect(cleanupCalled).toBe(true)
   })
 
   test('onFinish returns Observer for chaining', () => {

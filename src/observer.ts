@@ -101,6 +101,8 @@ export function createObserver(ioProvider: IOProvider): Observer {
         ? await (normalizer as PayloadNormalizer<HookEvent>).normalise(rawPayload) as unknown as Record<string, unknown>
         : rawPayload;
 
+      let exitCode: number | null = null
+
       try {
         log.info('handler invoked: {hookName}, {eventName}', { hookName, eventName })
 
@@ -111,17 +113,21 @@ export function createObserver(ioProvider: IOProvider): Observer {
       } catch (err) {
         if (isHookError(err)) {
           handleHookError(observer.io, hookName, err);
-          // Exit with the original error code (typically 2 for HookErrors) even if response was downgraded.
+          // Capture exit code — process.exit() is called after the finally block drains cleanups.
           // The stdout payload controls Claude Code's block/continue decision; the exit code signals to the OS
           // that this hook execution encountered an error condition, which is always true when HookError is thrown.
-          for (const cleanup of cleanups) {
-            try { await cleanup() } catch (cleanupErr) { log.error('onFinish callback threw: {err}', { err: cleanupErr }) }
-          }
-          process.exit(err.exitCode);
+          exitCode = err.exitCode
+        } else {
+          log.error('unhandled handler error: {err}', { err })
+          if (err instanceof Error) handleNonHookError(observer.io, err.message);
         }
-        log.error('unhandled handler error: {err}', { err })
-        if (err instanceof Error) handleNonHookError(observer.io, err.message);
+      } finally {
+        for (const cleanup of cleanups) {
+          try { await cleanup() } catch (cleanupErr) { log.error('onFinish callback threw: {err}', { err: cleanupErr }) }
+        }
       }
+
+      if (exitCode !== null) process.exit(exitCode)
     },
   }
 
