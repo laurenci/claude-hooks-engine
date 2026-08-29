@@ -21,6 +21,7 @@ interface Observer {
   normalizers: NormalizersPool
   subscribe: <E extends HookEvent>(hookName: E, eventName: string, handler: HookHandler<E>) => Observer
   withNormalizer: <E extends HookEvent>(hookName: E, normalizer: PayloadNormalizer<E>) => Observer
+  onFinish: (cb: () => Promise<void>) => Observer
   notify: (hookName: HookEvent, eventName: string) => Promise<void>
 }
 
@@ -44,6 +45,7 @@ function handleHookError(io: IO, hookName: string, err : HookError) {
 }
 
 export function createObserver(ioProvider: IOProvider): Observer {
+  const cleanups: Array<() => Promise<void>> = []
 
   const observer: Observer = {
     io: ioProvider(),
@@ -73,6 +75,11 @@ export function createObserver(ioProvider: IOProvider): Observer {
 
     withNormalizer<E extends HookEvent>(hookName: E, normalizer: PayloadNormalizer<E>): Observer {
       (observer.normalizers as Record<string, unknown>)[hookName] = normalizer
+      return observer
+    },
+
+    onFinish(cb: () => Promise<void>): Observer {
+      cleanups.push(cb)
       return observer
     },
 
@@ -107,6 +114,9 @@ export function createObserver(ioProvider: IOProvider): Observer {
           // Exit with the original error code (typically 2 for HookErrors) even if response was downgraded.
           // The stdout payload controls Claude Code's block/continue decision; the exit code signals to the OS
           // that this hook execution encountered an error condition, which is always true when HookError is thrown.
+          for (const cleanup of cleanups) {
+            try { await cleanup() } catch (cleanupErr) { log.error('onFinish callback threw: {err}', { err: cleanupErr }) }
+          }
           process.exit(err.exitCode);
         }
         log.error('unhandled handler error: {err}', { err })

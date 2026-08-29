@@ -117,3 +117,78 @@ test('notify() writes continue and stack to stderr for unknown errors', async ()
   expect(JSON.parse(stdout[0]!)).toEqual({ continue: true, systemMessage: expectedErrorMessage })
   expect(stderr[0]!).toContain(expectedErrorMessage)
 })
+
+describe('onFinish', () => {
+  test('callback is awaited before process.exit()', async () => {
+    const { io } = makeMockIO({ session_id: 's1', transcript_path: '/t' })
+    const order: string[] = []
+    const exitSpy = spyOn(process, 'exit').mockImplementation(() => { throw new Error('EXIT') })
+
+    const observer = createObserver(() => io)
+    observer
+      .onFinish(async () => { order.push('cleanup') })
+      .subscribe('Stop', 'test', async () => { throw Stop.blockingError('reason') })
+
+    try { await observer.notify('Stop', 'test') } catch {}
+
+    expect(order).toEqual(['cleanup'])
+    expect(exitSpy).toHaveBeenCalledWith(2)
+    exitSpy.mockRestore()
+  })
+
+  test('multiple callbacks run sequentially in registration order', async () => {
+    const { io } = makeMockIO({ session_id: 's1', transcript_path: '/t' })
+    const order: string[] = []
+    const exitSpy = spyOn(process, 'exit').mockImplementation(() => { throw new Error('EXIT') })
+
+    const observer = createObserver(() => io)
+    observer
+      .onFinish(async () => { order.push('first') })
+      .onFinish(async () => { order.push('second') })
+      .subscribe('Stop', 'test', async () => { throw Stop.blockingError('reason') })
+
+    try { await observer.notify('Stop', 'test') } catch {}
+
+    expect(order).toEqual(['first', 'second'])
+    exitSpy.mockRestore()
+  })
+
+  test('throwing callback is swallowed and subsequent callbacks still run', async () => {
+    const { io } = makeMockIO({ session_id: 's1', transcript_path: '/t' })
+    const order: string[] = []
+    const exitSpy = spyOn(process, 'exit').mockImplementation(() => { throw new Error('EXIT') })
+
+    const observer = createObserver(() => io)
+    observer
+      .onFinish(async () => { throw new Error('cleanup error') })
+      .onFinish(async () => { order.push('second') })
+      .subscribe('Stop', 'test', async () => { throw Stop.blockingError('reason') })
+
+    try { await observer.notify('Stop', 'test') } catch {}
+
+    expect(order).toEqual(['second'])
+    expect(exitSpy).toHaveBeenCalledWith(2)
+    exitSpy.mockRestore()
+  })
+
+  test('callbacks are NOT invoked on happy path', async () => {
+    const payload = { session_id: 'abc', transcript_path: '/t', hook_event_name: 'SessionStart', source: 'startup' }
+    const { io } = makeMockIO(payload)
+    let cleanupCalled = false
+
+    const observer = createObserver(() => io)
+    observer
+      .onFinish(async () => { cleanupCalled = true })
+      .subscribe('SessionStart', 'test', async () => ({ additionalContext: '' }))
+
+    await observer.notify('SessionStart', 'test')
+
+    expect(cleanupCalled).toBe(false)
+  })
+
+  test('onFinish returns Observer for chaining', () => {
+    const { io } = makeMockIO({})
+    const observer = createObserver(() => io)
+    expect(observer.onFinish(async () => {})).toBe(observer)
+  })
+})
