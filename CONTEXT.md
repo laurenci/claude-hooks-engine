@@ -5,8 +5,9 @@
 A TypeScript interface (not a class) describing an object thrown from a hook
 handler to signal that the handler cannot produce a valid response. `notify()`
 detects a `HookError` via `isHookError()`, reads its fields to write stdout
-and stderr, then calls `process.exit(exitCode)`. Unknown thrown values fall
-back to a safe-continue response.
+and stderr, awaits all registered Cleanup Callbacks in order, then calls
+`process.exit(exitCode)`. Unknown thrown values fall back to a safe-continue
+response.
 
 Fields: `kind`, `exitCode`, `outMessage?`, `errMessage?`.
 
@@ -61,6 +62,16 @@ object. `notify()` serializes it with `JSON.stringify` and writes it to
 stdout. Each hook's `blockingError()` factory enforces the hook-specific
 shape (e.g. `PreToolUse.blockingError()` produces
 `{ permissionDecision: 'deny', permissionDecisionReason }` as `outMessage`).
+
+## Cleanup Callback
+
+An async function (`() => Promise<void>`) registered on an Observer via
+`observer.onFinish()`. When `notify()` exits the process after a `HookError`,
+it awaits each registered Cleanup Callback sequentially in registration order
+before calling `process.exit()`. If a callback throws, the error is logged and
+execution continues to the next callback — the exit is never blocked.
+
+Typical uses: flushing async log sinks, closing open handles.
 
 ## Runtime Guard
 

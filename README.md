@@ -59,6 +59,7 @@ export const myHandler: PostToolUseHandler = async payload => {
 | `PostToolUse` | After a tool call completes |
 | `Notification` | Claude emits a notification |
 | `Stop` | The main agent finishes a turn |
+| `SubagentStart` | A subagent starts |
 | `SubagentStop` | A subagent finishes a turn |
 | `UserPromptSubmit` | A user prompt is submitted |
 | `PreCompact` | Before context compaction runs |
@@ -74,8 +75,8 @@ Payload types, response types, and error factories are grouped by hook — impor
 import * as PreToolUse from 'claude-hooks-engine/pre-tool-use'
 import * as Stop from 'claude-hooks-engine/stop'
 import * as SessionStart from 'claude-hooks-engine/session-start'
-// pre-tool-use | post-tool-use | notification | stop | subagent-stop
-// user-prompt-submit | pre-compact | session-start
+// pre-tool-use | post-tool-use | notification | stop | subagent-start
+// subagent-stop | user-prompt-submit | pre-compact | session-start
 ```
 
 Each module exports:
@@ -186,6 +187,23 @@ await configure({
 ```
 
 Call `configure()` before `createObserver(...)`.
+
+### Flushing async sinks before exit
+
+Some sinks (file, network) buffer writes asynchronously. When `notify()` exits the process after a hook error, buffered logs can be lost. Use `onFinish` to register a cleanup callback that runs before `process.exit()`:
+
+```typescript
+import { configure, dispose } from '@logtape/logtape'
+
+await configure({ ... })
+
+await createObserver(standartIOProvider)
+  .onFinish(async () => { await dispose() })
+  .subscribe('Stop', 'my-handler', myHandler)
+  .notify(args.hookName, args.eventName)
+```
+
+`onFinish` is chainable and accumulates callbacks in registration order. Each callback is awaited sequentially; a throwing callback is logged and skipped so subsequent callbacks still run.
 
 ## License
 
