@@ -188,9 +188,9 @@ await configure({
 
 Call `configure()` before `createObserver(...)`.
 
-### Flushing async sinks before exit
+### Cleanup callbacks
 
-Some sinks (file, network) buffer writes asynchronously. When `notify()` exits the process after a hook error, buffered logs can be lost. Use `onFinish` to register a cleanup callback that runs before `process.exit()`:
+Use `onFinish` to register async cleanup callbacks that run when `notify()` completes — on every code path (success, hook error, unexpected error):
 
 ```typescript
 import { configure, dispose } from '@logtape/logtape'
@@ -203,7 +203,7 @@ await createObserver(standartIOProvider)
   .notify(args.hookName, args.eventName)
 ```
 
-`onFinish` is chainable and accumulates callbacks in registration order. Each callback is awaited sequentially; a throwing callback is logged and skipped so subsequent callbacks still run.
+`onFinish` is chainable and accumulates callbacks in registration order. Each callback is awaited sequentially before `notify()` returns (or before `process.exit()` on a hook error). A throwing callback is logged and skipped so subsequent callbacks still run.
 
 ## License
 

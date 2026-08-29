@@ -66,10 +66,10 @@ shape (e.g. `PreToolUse.blockingError()` produces
 ## Cleanup Callback
 
 An async function (`() => Promise<void>`) registered on an Observer via
-`observer.onFinish()`. When `notify()` exits the process after a `HookError`,
-it awaits each registered Cleanup Callback sequentially in registration order
-before calling `process.exit()`. If a callback throws, the error is logged and
-execution continues to the next callback — the exit is never blocked.
+`observer.onFinish()`. Awaited on every code path — happy path, HookError, and
+unknown error — before `notify()` returns or calls `process.exit()`. Callbacks
+run sequentially in registration order via a `finally` block. If a callback
+throws, the error is logged and execution continues to the next callback.
 
 Typical uses: flushing async log sinks, closing open handles.
 

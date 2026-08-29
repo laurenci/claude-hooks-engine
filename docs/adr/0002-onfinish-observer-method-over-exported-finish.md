@@ -5,10 +5,11 @@ bypasses the Bun/Node event loop, meaning async log sinks (e.g. logtape file
 sinks) may not flush before the process terminates.
 
 To address this, we add `observer.onFinish(cb: () => Promise<void>): Observer`
-— a method that accumulates Cleanup Callbacks on the Observer. Before
-`process.exit(exitCode)` is called, `notify()` awaits each callback
-sequentially in registration order. Errors thrown by callbacks are logged and
-swallowed; the exit always proceeds.
+— a method that accumulates Cleanup Callbacks on the Observer. Callbacks are
+drained on **every code path** — happy path, HookError, and unknown error —
+via a `finally` block in `notify()`. The exit code (if any) is captured before
+the finally, and `process.exit()` is called after it. Errors thrown by
+callbacks are logged and swallowed; the exit always proceeds.
 
 The key design question was where consumers obtain the exit function that
 triggers cleanup. Two alternatives were considered:
