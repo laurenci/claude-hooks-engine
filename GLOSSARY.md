@@ -28,6 +28,10 @@ _Avoid_: Fatal error
 A HookError that lets Claude Code continue, optionally carrying a message for stdout or stderr.
 _Avoid_: Soft error, warning
 
+**Agent ID / Agent Type**:
+The identifier of a subagent instance and the name of its agent type. Present on a payload only when the hook fires inside a subagent (Agent Type also when Claude Code runs with `--agent`); their absence marks a main-thread call. Agent Type is the value subagent hook matchers filter on.
+_Avoid_: Subagent ID, subagent name
+
 **Cleanup Callback**:
 An async function registered on an Observer to run after every `notify()` outcome, typically to flush log sinks or close handles.
 _Avoid_: Finalizer, teardown hook

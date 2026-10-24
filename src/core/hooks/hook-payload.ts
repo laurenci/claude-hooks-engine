@@ -16,6 +16,8 @@ export interface HookPayload<T extends HookEvent> {
   permission_mode: PermissionMode
   transcript_path: string
   hook_event_name: T
+  agent_id?: string
+  agent_type?: string
 }
 
 export interface PayloadNormalizer<E extends HookEvent, T extends HookPayload<E> = HookPayload<E>> {
