@@ -59,7 +59,7 @@
   },
   "keywords": ["claude", "claude-code", "hooks", "ai-hooks"],
   "scripts": {
-    "build:js": "bun build ./index.ts ./src/core/hooks/pre-tool-use/index.ts ./src/core/hooks/stop/index.ts ./src/core/hooks/subagent-stop/index.ts ./src/core/hooks/user-prompt-submit/index.ts ./src/core/hooks/pre-compact/index.ts ./src/core/hooks/post-tool-use/index.ts ./src/core/hooks/notification/index.ts ./src/core/hooks/session-start/index.ts --outdir ./dist --target node --format esm",
+    "build:js": "bun build ./index.ts ./src/core/hooks/pre-tool-use/index.ts ./src/core/hooks/stop/index.ts ./src/core/hooks/subagent-start/index.ts ./src/core/hooks/subagent-stop/index.ts ./src/core/hooks/user-prompt-submit/index.ts ./src/core/hooks/pre-compact/index.ts ./src/core/hooks/post-tool-use/index.ts ./src/core/hooks/notification/index.ts ./src/core/hooks/session-start/index.ts --outdir ./dist --target node --format esm",
     "build:types": "tsc -p tsconfig.build.json",
     "build": "bun run build:js && bun run build:types",
     "handler": "bun ./src/index.ts",
