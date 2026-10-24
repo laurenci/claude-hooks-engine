@@ -26,6 +26,11 @@ Key concepts:
 
 The public API is exported from the root `index.ts` barrel. `src/` contains only library internals. There are no example scripts or plugin implementations in this repo — those live in consumer projects.
 
+## Further Reading
+
+- `GLOSSARY.md` — canonical domain vocabulary; use these terms in code and docs
+- `docs/adr/` — architectural decisions and their rationale
+
 ## Commands
 
 ```bash
