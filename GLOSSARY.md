@@ -35,3 +35,11 @@ _Avoid_: Subagent ID, subagent name
 **Cleanup Callback**:
 An async function registered on an Observer to run after every `notify()` outcome, typically to flush log sinks or close handles.
 _Avoid_: Finalizer, teardown hook
+
+**Payload Normalizer**:
+An optional transformer registered on an Observer per hook event, applied to the raw stdin JSON before the handler receives it. If it throws, the handler is not invoked.
+_Avoid_: Preprocessor, payload middleware
+
+**NormalizationError**:
+An `Error` subclass thrown by the PostToolUse normalizer when a matching tool's string response is not a readable overflow message (`reason`: `'unrecognized-string'` or `'overflow-read-failed'`). Not a HookError; the Observer reports it as a non-blocking `systemMessage`.
+_Avoid_: Overflow error, parse error

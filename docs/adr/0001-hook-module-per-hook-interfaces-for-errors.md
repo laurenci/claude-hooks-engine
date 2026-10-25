@@ -14,3 +14,5 @@ Alongside this, `HookError`, `BlockingHookError`, and `NonBlockingHookError` wer
 ## Consequences
 
 Breaking change — requires a major version bump. The single consumer needs a migration from `import { PreToolUse } from 'claude-hooks-engine'` and `new PreToolUse.BlockingError(...)` to `import * as PreToolUse from 'claude-hooks-engine/pre-tool-use'` and `throw PreToolUse.blockingError(...)`. Sub-path exports require an `exports` map in `package.json`.
+
+`NormalizationError` (exported from `post-tool-use`) is deliberately a class extending `Error`. It is not a HookError: it is thrown by a Payload Normalizer, not a handler, carries no `kind` or `exitCode`, and `isHookError()` is false for it. A class is kept so consumers get `cause` and a stack trace; `notify()` reports it as a non-blocking `systemMessage`.

@@ -129,7 +129,7 @@ if (isHookError(err)) { ... }
 
 ## PostToolUse Overflow Normalizer
 
-Claude Code truncates large tool responses and writes them to a temp file. Use `postToolUseNormalizer` to transparently resolve the file back into the payload:
+Claude Code truncates large MCP tool responses and writes them to a temp file. Use `postToolUseNormalizer` to transparently resolve the file back into the payload:
 
 ```typescript
 import { bunFileReader } from 'claude-hooks-engine'
@@ -139,6 +139,19 @@ await createObserver(standartIOProvider)
   .withNormalizer('PostToolUse', postToolUseNormalizer(bunFileReader))
   .subscribe('PostToolUse', 'my-tool', myHandler)
   .notify(args.hookName, args.eventName)
+```
+
+Only MCP tools (`mcp__*`) are normalized; built-in tools such as `Read` or `Skill` pass through untouched, so the same observer can also handle them. Use `tools` (a `RegExp` or predicate) to change which tools are normalized.
+
+If a matching tool returns a string that is not a readable overflow message, the normalizer throws a `NormalizationError` (`reason`: `'unrecognized-string'` or `'overflow-read-failed'`). The observer reports it as a non-blocking `systemMessage` (it is not a HookError) and does not call the handler. Pass `onError` to recover instead:
+
+```typescript
+postToolUseNormalizer(bunFileReader, {
+  onError: (error, rawData) => {
+    log.warn('overflow not normalized: {reason}', { reason: error.reason })
+    return rawData as unknown as Payload // continue with the raw payload (Payload from 'claude-hooks-engine/post-tool-use')
+  },
+})
 ```
 
 ## Logging

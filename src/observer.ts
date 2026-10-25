@@ -96,14 +96,16 @@ export function createObserver(ioProvider: IOProvider): Observer {
       const rawPayload = await observer.io.in.json() as Record<string, unknown>
       log.debug('received payload: {payload}', () => ({ payload: rawPayload }))
 
-      const normalizer = observer.normalizers[hookName]
-      const payload: Record<string, unknown> = normalizer
-        ? await (normalizer as PayloadNormalizer<HookEvent>).normalise(rawPayload) as unknown as Record<string, unknown>
-        : rawPayload
-
       let exitCode: number | null = null
 
       try {
+        // Normalization runs inside the try so a failing normalizer is reported like a failing handler:
+        // a HookError is honoured, anything else becomes a non-blocking systemMessage. The handler is not invoked.
+        const normalizer = observer.normalizers[hookName]
+        const payload: Record<string, unknown> = normalizer
+          ? await (normalizer as PayloadNormalizer<HookEvent>).normalise(rawPayload) as unknown as Record<string, unknown>
+          : rawPayload
+
         log.info('handler invoked: {hookName}, {eventName}', { hookName, eventName })
 
         const response = await (handler as (p: unknown) => Promise<unknown>)(payload)
