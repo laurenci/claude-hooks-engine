@@ -1,6 +1,6 @@
 {
   "name": "claude-hooks-engine",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Type-safe observer framework for Claude Code hook scripts",
   "author": "Maksym Mishchuk maxim.mishchuk@gmail.com",
   "license": "MIT",
